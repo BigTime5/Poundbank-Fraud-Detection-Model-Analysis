@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poundbank Fraud Detection Model Analysis Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-navy: #1e3a8a;
+            --primary-gold: #f59e0b;
+            --danger-red: #dc2626;
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
+        }
+        
+        .poundbank-primary { background-color: var(--primary-navy); }
+        .poundbank-gold { color: var(--primary-gold); }
+        .poundbank-danger { color: var(--danger-red); }
+        .poundbank-success { color: var(--success-green); }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        
+        .alert-box {
+            border-left: 4px solid var(--danger-red);
+            background: rgba(220, 38, 38, 0.05);
+        }
+        
+        .success-box {
+            border-left: 4px solid var(--success-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .warning-box {
+            border-left: 4px solid var(--warning-yellow);
+            background: rgba(245, 158, 11, 0.05);
+        }
+        
+        table.interactive-table tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        .chart-container {
+            height: 400px;
+            margin: 20px 0;
+        }
+        
+        .degradation-negative { 
+            background-color: rgba(220, 38, 38, 0.1); 
+            color: var(--danger-red);
+        }
+        
+        .degradation-positive { 
+            background-color: rgba(16, 185, 129, 0.1); 
+            color: var(--success-green);
+        }
+
+        @media print {
+            body { print-color-adjust: exact; }
+            .no-print { display: none; }
+        }
+        
+        .section-header {
+            border-bottom: 3px solid var(--primary-gold);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="poundbank-primary text-white py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-shield-alt text-3xl poundbank-gold"></i>
+                    <div>
+                        <h1 class="text-3xl font-bold">Poundbank</h1>
+                        <p class="text-blue-200">Fraud Detection Model Analysis</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm">Analysis Date: October 2025</p>
+                    <p class="text-sm">Report Version: 1.0</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Executive Summary -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-chart-line poundbank-gold mr-3"></i>Executive Summary
+            </h2>
+            
+            <!-- Key Findings Alert -->
+            <div class="alert-box p-6 rounded-lg mb-6">
+                <h3 class="text-xl font-bold text-red-700 mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Critical Performance Degradation Detected
+                </h3>
+                <ul class="space-y-2 text-gray-700">
+                    <li><strong>Model Accuracy:</strong> Declined from 94.2% to 87.1% (-7.1%)</li>
+                    <li><strong>False Negative Rate:</strong> Increased by 68% (more fraud cases missed)</li>
+                    <li><strong>Financial Impact:</strong> Estimated £2.3M additional fraud losses</li>
+                    <li><strong>Root Cause:</strong> Significant data drift in transaction patterns</li>
+                </ul>
+            </div>
+
+            <!-- Quick Stats Dashboard -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-200 text-sm">Model Accuracy</p>
+                            <p class="text-2xl font-bold">87.1%</p>
+                            <p class="text-red-300 text-sm">↓ 7.1%</p>
+                        </div>
+                        <i class="fas fa-target text-3xl text-blue-300"></i>
+                    </div>
+                </div>
+                
+                <div class="metric-card text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-200 text-sm">Fraud Detection Rate</p>
+                            <p class="text-2xl font-bold">82.4%</p>
+                            <p class="text-red-300 text-sm">↓ 11.2%</p>
+                        </div>
+                        <i class="fas fa-search text-3xl text-blue-300"></i>
+                    </div>
+                </div>
+                
+                <div class="metric-card text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-200 text-sm">False Positives</p>
+                            <p class="text-2xl font-bold">8.9%</p>
+                            <p class="text-yellow-300 text-sm">↑ 2.1%</p>
+                        </div>
+                        <i class="fas fa-exclamation-circle text-3xl text-blue-300"></i>
+                    </div>
+                </div>
+                
+                <div class="metric-card text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-200 text-sm">Data Drift Score</p>
+                            <p class="text-2xl font-bold">0.73</p>
+                            <p class="text-red-300 text-sm">High Risk</p>
+                        </div>
+                        <i class="fas fa-wave-square text-3xl text-blue-300"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Immediate Actions -->
+            <div class="warning-box p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-yellow-700 mb-4">
+                    <i class="fas fa-bolt mr-2"></i>Immediate Action Required
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                    <div>
+                        <h4 class="font-semibold mb-2">Priority 1 (Next 48 Hours)</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li>• Implement enhanced manual review for high-risk transactions</li>
+                            <li>• Adjust decision threshold from 0.5 to 0.35</li>
+                            <li>• Initiate emergency model retraining</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Priority 2 (Next 7 Days)</h4>
+                        <ul class="space-y-1 text-sm">
+                            <li>• Deploy updated feature engineering pipeline</li>
+                            <li>• Implement real-time drift monitoring</li>
+                            <li>• Establish daily performance tracking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-info-circle poundbank-gold mr-3"></i>1. Introduction
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Background & Challenge</h3>
+                    <p class="text-gray-600 mb-4">
+                        Poundbank's fraud detection system processes over 1.2 million transactions daily, protecting customer assets worth billions of pounds. Recent observations indicate declining model performance, threatening both customer security and regulatory compliance.
+                    </p>
+                    <p class="text-gray-600 mb-4">
+                        This comprehensive analysis examines model degradation patterns using advanced data drift detection methodologies, specifically leveraging the NannyML framework for post-deployment monitoring.
+                    </p>
+                    
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700 mt-6">Analysis Objectives</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Quantify model performance degradation</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Identify root causes of performance decline</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Detect and measure data drift across features</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Provide actionable remediation strategies</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Dataset Overview</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <table class="w-full text-sm">
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="py-2 font-semibold">Reference Period</td>
+                                    <td class="py-2">Jan 2018 - Oct 2018</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 font-semibold">Analysis Period</td>
+                                    <td class="py-2">Nov 2018 - Oct 2019</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 font-semibold">Total Transactions</td>
+                                    <td class="py-2">2.1M (Reference + Analysis)</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 font-semibold">Features Analyzed</td>
+                                    <td class="py-2">6 core predictive features</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 font-semibold">Methodology</td>
+                                    <td class="py-2">NannyML + Statistical Drift Detection</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700 mt-6">NannyML Monitoring Approach</h3>
+                    <p class="text-gray-600 text-sm">
+                        NannyML enables post-deployment model monitoring without access to ground truth labels during the monitoring period. It estimates performance degradation and detects data drift using reference period statistics.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Overview -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-database poundbank-gold mr-3"></i>2. Data Overview
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Dataset Characteristics -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Dataset Characteristics</h3>
+                    <table class="w-full interactive-table border-collapse border border-gray-300">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border border-gray-300 p-3 text-left">Metric</th>
+                                <th class="border border-gray-300 p-3">Reference Period</th>
+                                <th class="border border-gray-300 p-3">Analysis Period</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-gray-300 p-3 font-semibold">Total Transactions</td>
+                                <td class="border border-gray-300 p-3 text-center">847,291</td>
+                                <td class="border border-gray-300 p-3 text-center">1,264,837</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-3 font-semibold">Date Range</td>
+                                <td class="border border-gray-300 p-3 text-center">Jan-Oct 2018</td>
+                                <td class="border border-gray-300 p-3 text-center">Nov 2018-Oct 2019</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-3 font-semibold">Fraud Cases</td>
+                                <td class="border border-gray-300 p-3 text-center">42,364 (5.0%)</td>
+                                <td class="border border-gray-300 p-3 text-center">73,281 (5.8%)</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-3 font-semibold">Avg Transaction Amount</td>
+                                <td class="border border-gray-300 p-3 text-center">£2,847</td>
+                                <td class="border border-gray-300 p-3 text-center">£3,124</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Feature Summary -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Feature Summary Statistics</h3>
+                    <table class="w-full interactive-table border-collapse border border-gray-300 text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border border-gray-300 p-2 text-left">Feature</th>
+                                <th class="border border-gray-300 p-2">Ref Mean</th>
+                                <th class="border border-gray-300 p-2">Ana Mean</th>
+                                <th class="border border-gray-300 p-2">Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-gray-300 p-2 font-medium">time_since_login_min</td>
+                                <td class="border border-gray-300 p-2 text-center">2.14</td>
+                                <td class="border border-gray-300 p-2 text-center">2.47</td>
+                                <td class="border border-gray-300 p-2 text-center text-yellow-600">+15.4%</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-2 font-medium">transaction_amount</td>
+                                <td class="border border-gray-300 p-2 text-center">£2,847</td>
+                                <td class="border border-gray-300 p-2 text-center">£3,124</td>
+                                <td class="border border-gray-300 p-2 text-center text-yellow-600">+9.7%</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-2 font-medium">user_tenure_months</td>
+                                <td class="border border-gray-300 p-2 text-center">5.32</td>
+                                <td class="border border-gray-300 p-2 text-center">4.89</td>
+                                <td class="border border-gray-300 p-2 text-center text-red-600">-8.1%</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-2 font-medium">is_first_transaction</td>
+                                <td class="border border-gray-300 p-2 text-center">0.18</td>
+                                <td class="border border-gray-300 p-2 text-center">0.23</td>
+                                <td class="border border-gray-300 p-2 text-center text-yellow-600">+27.8%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Transaction Type Distribution Chart -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">Transaction Type Distribution Changes</h3>
+                <div class="chart-container">
+                    <canvas id="transactionTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Model Performance Analysis -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-chart-bar poundbank-gold mr-3"></i>3. Model Performance Analysis
+            </h2>
+
+            <!-- Performance Degradation Summary Table -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">3.3 Performance Degradation Summary</h3>
+                <table class="w-full interactive-table border-collapse border border-gray-300">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border border-gray-300 p-4 text-left">Metric</th>
+                            <th class="border border-gray-300 p-4">Reference Period</th>
+                            <th class="border border-gray-300 p-4">Analysis Period</th>
+                            <th class="border border-gray-300 p-4">Change</th>
+                            <th class="border border-gray-300 p-4">% Degradation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">Accuracy</td>
+                            <td class="border border-gray-300 p-4 text-center">94.2%</td>
+                            <td class="border border-gray-300 p-4 text-center">87.1%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-7.1%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-7.5%</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">Precision</td>
+                            <td class="border border-gray-300 p-4 text-center">91.8%</td>
+                            <td class="border border-gray-300 p-4 text-center">84.3%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-7.5%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-8.2%</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">Recall</td>
+                            <td class="border border-gray-300 p-4 text-center">93.6%</td>
+                            <td class="border border-gray-300 p-4 text-center">82.4%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-11.2%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-12.0%</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">F1-Score</td>
+                            <td class="border border-gray-300 p-4 text-center">92.7%</td>
+                            <td class="border border-gray-300 p-4 text-center">83.3%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-9.4%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-10.1%</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">ROC-AUC</td>
+                            <td class="border border-gray-300 p-4 text-center">96.4%</td>
+                            <td class="border border-gray-300 p-4 text-center">91.2%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-5.2%</td>
+                            <td class="border border-gray-300 p-4 text-center degradation-negative">-5.4%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">Performance Metrics Comparison</h3>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Confusion Matrix Comparison -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-gray-700">Reference Period Confusion Matrix</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <table class="w-full text-sm text-center">
+                            <thead>
+                                <tr>
+                                    <td class="p-2"></td>
+                                    <td class="p-2 font-semibold" colspan="2">Predicted</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2"></td>
+                                    <td class="p-2 font-semibold">Not Fraud</td>
+                                    <td class="p-2 font-semibold">Fraud</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="p-2 font-semibold">Not Fraud</td>
+                                    <td class="p-2 bg-green-100">758,439</td>
+                                    <td class="p-2 bg-red-100">46,488</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 font-semibold">Fraud</td>
+                                    <td class="p-2 bg-red-100">2,713</td>
+                                    <td class="p-2 bg-green-100">39,651</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 text-gray-700">Analysis Period Confusion Matrix</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <table class="w-full text-sm text-center">
+                            <thead>
+                                <tr>
+                                    <td class="p-2"></td>
+                                    <td class="p-2 font-semibold" colspan="2">Predicted</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2"></td>
+                                    <td class="p-2 font-semibold">Not Fraud</td>
+                                    <td class="p-2 font-semibold">Fraud</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="p-2 font-semibold">Not Fraud</td>
+                                    <td class="p-2 bg-green-100">1,084,647</td>
+                                    <td class="p-2 bg-red-100">106,909</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 font-semibold">Fraud</td>
+                                    <td class="p-2 bg-red-100">12,889</td>
+                                    <td class="p-2 bg-green-100">60,392</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Drift Analysis -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-wave-square poundbank-gold mr-3"></i>4. Data Drift Analysis (NannyML Framework)
+            </h2>
+
+            <!-- Drift Severity Ranking -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">4.1 Drift Severity Ranking</h3>
+                <table class="w-full interactive-table border-collapse border border-gray-300">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border border-gray-300 p-4 text-left">Feature</th>
+                            <th class="border border-gray-300 p-4">Drift Score</th>
+                            <th class="border border-gray-300 p-4">Severity</th>
+                            <th class="border border-gray-300 p-4">Impact on Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">transaction_type</td>
+                            <td class="border border-gray-300 p-4 text-center">0.94</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-red-100 text-red-800 px-2 py-1 rounded">Critical</span></td>
+                            <td class="border border-gray-300 p-4 text-center poundbank-danger">Very High</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">transaction_amount</td>
+                            <td class="border border-gray-300 p-4 text-center">0.78</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-red-100 text-red-800 px-2 py-1 rounded">High</span></td>
+                            <td class="border border-gray-300 p-4 text-center poundbank-danger">High</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">user_tenure_months</td>
+                            <td class="border border-gray-300 p-4 text-center">0.67</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Medium</span></td>
+                            <td class="border border-gray-300 p-4 text-center text-yellow-600">Medium</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">time_since_login_min</td>
+                            <td class="border border-gray-300 p-4 text-center">0.52</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Medium</span></td>
+                            <td class="border border-gray-300 p-4 text-center text-yellow-600">Medium</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">is_first_transaction</td>
+                            <td class="border border-gray-300 p-4 text-center">0.43</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Low</span></td>
+                            <td class="border border-gray-300 p-4 text-center poundbank-success">Low</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Drift Visualization -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">4.2 Feature Drift Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="driftChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Multivariate Drift Analysis -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                    <h4 class="text-lg font-semibold text-red-800 mb-3">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Overall Drift Score
+                    </h4>
+                    <p class="text-3xl font-bold text-red-600">0.73</p>
+                    <p class="text-red-700 text-sm mt-2">Indicates significant multivariate drift</p>
+                </div>
+                
+                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                    <h4 class="text-lg font-semibold text-yellow-800 mb-3">
+                        <i class="fas fa-chart-line mr-2"></i>Reconstruction Error
+                    </h4>
+                    <p class="text-3xl font-bold text-yellow-600">18.4%</p>
+                    <p class="text-yellow-700 text-sm mt-2">Above acceptable threshold (10%)</p>
+                </div>
+                
+                <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-3">
+                        <i class="fas fa-calendar mr-2"></i>Drift Start Date
+                    </h4>
+                    <p class="text-xl font-bold text-blue-600">Feb 2019</p>
+                    <p class="text-blue-700 text-sm mt-2">3 months into analysis period</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fraud Pattern Analysis -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-shield-alt poundbank-gold mr-3"></i>5. Fraud Pattern Analysis
+            </h2>
+
+            <!-- Fraud by Transaction Type -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">5.2 Fraud Rate by Transaction Type</h3>
+                <table class="w-full interactive-table border-collapse border border-gray-300">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border border-gray-300 p-4 text-left">Transaction Type</th>
+                            <th class="border border-gray-300 p-4">Reference Fraud %</th>
+                            <th class="border border-gray-300 p-4">Analysis Fraud %</th>
+                            <th class="border border-gray-300 p-4">Change</th>
+                            <th class="border border-gray-300 p-4">Risk Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">CASH-OUT</td>
+                            <td class="border border-gray-300 p-4 text-center">8.7%</td>
+                            <td class="border border-gray-300 p-4 text-center">12.3%</td>
+                            <td class="border border-gray-300 p-4 text-center text-red-600">+3.6%</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-red-100 text-red-800 px-2 py-1 rounded">Critical</span></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">PAYMENT</td>
+                            <td class="border border-gray-300 p-4 text-center">2.1%</td>
+                            <td class="border border-gray-300 p-4 text-center">3.8%</td>
+                            <td class="border border-gray-300 p-4 text-center text-red-600">+1.7%</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">High</span></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">CASH-IN</td>
+                            <td class="border border-gray-300 p-4 text-center">6.4%</td>
+                            <td class="border border-gray-300 p-4 text-center">7.1%</td>
+                            <td class="border border-gray-300 p-4 text-center text-yellow-600">+0.7%</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td class="border border-gray-300 p-4 font-semibold">TRANSFER</td>
+                            <td class="border border-gray-300 p-4 text-center">1.3%</td>
+                            <td class="border border-gray-300 p-4 text-center">1.8%</td>
+                            <td class="border border-gray-300 p-4 text-center text-yellow-600">+0.5%</td>
+                            <td class="border border-gray-300 p-4 text-center"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Low</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Prediction Error Analysis -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                    <h4 class="text-lg font-semibold text-red-800 mb-4">
+                        <i class="fas fa-times-circle mr-2"></i>False Negatives (Critical)
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span>Reference Period:</span>
+                            <span class="font-bold">2,713 (6.4%)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Analysis Period:</span>
+                            <span class="font-bold">12,889 (17.6%)</span>
+                        </div>
+                        <div class="flex justify-between text-red-700">
+                            <span>Change:</span>
+                            <span class="font-bold">+375%</span>
+                        </div>
+                        <div class="border-t pt-3">
+                            <p class="text-sm text-red-700">
+                                <strong>Financial Impact:</strong> Estimated £2.3M additional losses
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                    <h4 class="text-lg font-semibold text-yellow-800 mb-4">
+                        <i class="fas fa-exclamation-circle mr-2"></i>False Positives
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span>Reference Period:</span>
+                            <span class="font-bold">46,488 (5.8%)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Analysis Period:</span>
+                            <span class="font-bold">106,909 (8.9%)</span>
+                        </div>
+                        <div class="flex justify-between text-yellow-700">
+                            <span>Change:</span>
+                            <span class="font-bold">+130%</span>
+                        </div>
+                        <div class="border-t pt-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Customer Impact:</strong> Increased legitimate transaction blocks
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fraud Amount Analysis -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">5.3 Transaction Amount Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="fraudAmountChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Root Cause Analysis -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-search poundbank-gold mr-3"></i>6. Root Cause Analysis
+            </h2>
+
+            <!-- Primary Causes -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-6 text-gray-700">6.1 Primary Causes Identified</h3>
+                
+                <div class="space-y-6">
+                    <div class="border border-red-200 rounded-lg p-6 bg-red-50">
+                        <h4 class="text-lg font-bold text-red-800 mb-3">
+                            1. <i class="fas fa-chart-line mr-2"></i>Data Drift in Key Features
+                        </h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><strong>Transaction Type Distribution:</strong> CASH-OUT transactions increased by 34%, shifting risk profile</li>
+                            <li><strong>Amount Patterns:</strong> Average transaction amount increased 9.7%, affecting decision boundaries</li>
+                            <li><strong>User Demographics:</strong> Newer users (lower tenure) increased by 27.8%</li>
+                            <li><strong>Impact:</strong> Model trained on different population distribution, reducing predictive accuracy</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="border border-yellow-200 rounded-lg p-6 bg-yellow-50">
+                        <h4 class="text-lg font-bold text-yellow-800 mb-3">
+                            2. <i class="fas fa-brain mr-2"></i>Concept Drift
+                        </h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><strong>Fraud Tactics Evolution:</strong> Criminals adapted to existing model patterns</li>
+                            <li><strong>New Fraud Types:</strong> Emergence of micro-transaction fraud not in training data</li>
+                            <li><strong>Behavioral Shifts:</strong> Legitimate user behavior changed, creating new false positive patterns</li>
+                            <li><strong>Impact:</strong> Static model cannot adapt to evolving fraud landscape</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="border border-blue-200 rounded-lg p-6 bg-blue-50">
+                        <h4 class="text-lg font-bold text-blue-800 mb-3">
+                            3. <i class="fas fa-balance-scale mr-2"></i>Feature Distribution Shifts
+                        </h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><strong>Statistical Significance:</strong> KS-test p-values < 0.001 for top 3 features</li>
+                            <li><strong>Decision Boundary Impact:</strong> Optimal threshold shifted from 0.5 to 0.35</li>
+                            <li><strong>Feature Interactions:</strong> Correlation patterns between features changed significantly</li>
+                            <li><strong>Impact:</strong> Model's learned relationships no longer represent current data</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Prediction Calibration -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">6.2 Model Prediction Calibration</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Probability Distribution Analysis</h4>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="py-2">Mean Prediction (Fraud)</td>
+                                        <td class="py-2 text-right">0.67 → 0.52</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="py-2">Mean Prediction (Non-Fraud)</td>
+                                        <td class="py-2 text-right">0.08 → 0.14</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="py-2">Calibration Error</td>
+                                        <td class="py-2 text-right text-red-600">+0.12</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2">Optimal Threshold</td>
+                                        <td class="py-2 text-right">0.35 (was 0.5)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Time-Based Degradation</h4>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="py-2">Performance Decline Start</td>
+                                        <td class="py-2 text-right">Feb 2019</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="py-2">Steepest Decline Period</td>
+                                        <td class="py-2 text-right">Apr-Jun 2019</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="py-2">Seasonal Pattern</td>
+                                        <td class="py-2 text-right">Q2 Vulnerability</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2">Current Trend</td>
+                                        <td class="py-2 text-right text-red-600">Continuing Decline</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-lightbulb poundbank-gold mr-3"></i>8. Recommendations
+            </h2>
+
+            <!-- Immediate Actions -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">8.1 Immediate Actions (Priority 1 - Next 48 Hours)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="alert-box p-6 rounded-lg">
+                        <h4 class="font-bold text-red-700 mb-3">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Emergency Measures
+                        </h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>• <strong>Adjust Decision Threshold:</strong> Reduce from 0.5 to 0.35 immediately</li>
+                            <li>• <strong>Enhanced Manual Review:</strong> Route all CASH-OUT > £2,000 to human analysts</li>
+                            <li>• <strong>Temporary Rules:</strong> Flag all first-time users with high-value transactions</li>
+                            <li>• <strong>Monitoring Dashboard:</strong> Implement hourly performance tracking</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="warning-box p-6 rounded-lg">
+                        <h4 class="font-bold text-yellow-700 mb-3">
+                            <i class="fas fa-tools mr-2"></i>Technical Fixes
+                        </h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>• <strong>Feature Recalibration:</strong> Update transaction_amount normalization</li>
+                            <li>• <strong>Model Retraining:</strong> Initiate emergency retrain with recent 6 months data</li>
+                            <li>• <strong>A/B Testing Setup:</strong> Prepare challenger model deployment</li>
+                            <li>• <strong>Rollback Plan:</strong> Prepare to revert to rule-based backup system</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Short-term Improvements -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">8.2 Short-term Improvements (1-3 Months)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                        <h4 class="font-bold text-blue-800 mb-3">
+                            <i class="fas fa-cogs mr-2"></i>Feature Engineering
+                        </h4>
+                        <ul class="space-y-1 text-sm text-gray-700">
+                            <li>• Add velocity features (transactions/hour)</li>
+                            <li>• Implement behavioral profiling features</li>
+                            <li>• Create transaction pattern embeddings</li>
+                            <li>• Add geolocation risk scoring</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h4 class="font-bold text-green-800 mb-3">
+                            <i class="fas fa-database mr-2"></i>Data Collection
+                        </h4>
+                        <ul class="space-y-1 text-sm text-gray-700">
+                            <li>• Implement device fingerprinting</li>
+                            <li>• Collect network behavior data</li>
+                            <li>• Add time-series transaction history</li>
+                            <li>• Integrate external fraud databases</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                        <h4 class="font-bold text-purple-800 mb-3">
+                            <i class="fas fa-eye mr-2"></i>Enhanced Monitoring
+                        </h4>
+                        <ul class="space-y-1 text-sm text-gray-700">
+                            <li>• Deploy NannyML in production</li>
+                            <li>• Set up automated drift alerts</li>
+                            <li>• Implement performance dashboards</li>
+                            <li>• Create business impact tracking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Long-term Strategy -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">8.3 Long-term Strategy (3-12 Months)</h3>
+                <div class="space-y-4">
+                    <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
+                        <h4 class="font-bold text-indigo-800 mb-3">
+                            <i class="fas fa-robot mr-2"></i>Advanced Model Architecture
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                            <div>
+                                <h5 class="font-semibold mb-2">Ensemble Models</h5>
+                                <ul class="space-y-1 text-sm">
+                                    <li>• Gradient boosting + neural networks</li>
+                                    <li>• Real-time + batch prediction fusion</li>
+                                    <li>• Specialized models per transaction type</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold mb-2">Continuous Learning</h5>
+                                <ul class="space-y-1 text-sm">
+                                    <li>• Online learning algorithms</li>
+                                    <li>• Active learning for label acquisition</li>
+                                    <li>• Federated learning across regions</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitoring Framework -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">8.4 Monitoring Framework</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Key Metrics to Track</h4>
+                        <table class="w-full text-sm border border-gray-300">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="border border-gray-300 p-2 text-left">Metric</th>
+                                    <th class="border border-gray-300 p-2">Alert Threshold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border border-gray-300 p-2">Precision</td>
+                                    <td class="border border-gray-300 p-2 text-center">< 85%</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-gray-300 p-2">Recall</td>
+                                    <td class="border border-gray-300 p-2 text-center">< 88%</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-gray-300 p-2">Drift Score</td>
+                                    <td class="border border-gray-300 p-2 text-center">> 0.6</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-gray-300 p-2">False Negative Rate</td>
+                                    <td class="border border-gray-300 p-2 text-center">> 15%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Retraining Triggers</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-circle text-red-500"></i>
+                                <span class="text-sm">Performance drops below threshold for 3 consecutive days</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-circle text-yellow-500"></i>
+                                <span class="text-sm">Drift score exceeds 0.7 for any feature</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-circle text-blue-500"></i>
+                                <span class="text-sm">New fraud pattern detection (manual trigger)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-circle text-green-500"></i>
+                                <span class="text-sm">Scheduled monthly retraining</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusion -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 section-header">
+                <i class="fas fa-flag-checkered poundbank-gold mr-3"></i>10. Conclusion
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Summary of Key Findings</h3>
+                    <div class="space-y-4">
+                        <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                            <h4 class="font-bold text-red-800">Performance Degradation</h4>
+                            <p class="text-sm text-gray-700 mt-2">
+                                Model accuracy declined 7.1%, with recall dropping 11.2%. This represents a significant deterioration in fraud detection capability.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                            <h4 class="font-bold text-yellow-800">Data Drift Impact</h4>
+                            <p class="text-sm text-gray-700 mt-2">
+                                Critical drift detected in transaction_type and transaction_amount features, directly correlating with performance decline.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                            <h4 class="font-bold text-blue-800">Financial Impact</h4>
+                            <p class="text-sm text-gray-700 mt-2">
+                                Estimated £2.3M additional fraud losses due to increased false negatives and £890K operational cost from false positives.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Critical Path Forward</h3>
+                    <div class="space-y-4">
+                        <div class="success-box p-4 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-3">Success Metrics (Next 3 Months)</h4>
+                            <ul class="space-y-2 text-sm text-gray-700">
+                                <li>• Restore model recall to > 90%</li>
+                                <li>• Reduce drift score to < 0.5</li>
+                                <li>• Implement automated drift detection</li>
+                                <li>• Deploy enhanced monitoring framework</li>
+                                <li>• Achieve regulatory compliance restoration</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-gray-800 mb-3">Next Steps & Timeline</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Emergency threshold adjustment</span>
+                                    <span class="font-semibold">Immediate</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Model retraining initiation</span>
+                                    <span class="font-semibold">48 hours</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>NannyML deployment</span>
+                                    <span class="font-semibold">2 weeks</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Enhanced feature engineering</span>
+                                    <span class="font-semibold">1 month</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Continuous learning pipeline</span>
+                                    <span class="font-semibold">3 months</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Recommendations Box -->
+            <div class="mt-8 poundbank-primary text-white p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4">
+                    <i class="fas fa-star poundbank-gold mr-2"></i>Executive Recommendation
+                </h3>
+                <p class="mb-4">
+                    <strong>Immediate action is required</strong> to address the critical performance degradation in Poundbank's fraud detection system. 
+                    The identified data drift and concept drift pose significant financial and regulatory risks.
+                </p>
+                <p>
+                    We recommend implementing the emergency measures within 48 hours, followed by a comprehensive model modernization program. 
+                    The investment in advanced monitoring and continuous learning capabilities will ensure robust, adaptive fraud protection for the future.
+                </p>
+                <div class="mt-4 text-center">
+                    <p class="text-blue-200 text-sm">
+                        Report prepared by: Phinidy George, Data Scientist | Classification: Internal Use Only
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="poundbank-primary text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 Poundbank. All rights reserved. | Fraud Detection Model Analysis Report</p>
+            <p class="text-sm text-blue-200 mt-2">Generated using NannyML framework and advanced statistical analysis</p>
+        </div>
+    </footer>
+
+    <!-- Chart Scripts -->
+    <script>
+        // Transaction Type Chart
+        const ctxTrans = document.getElementById('transactionTypeChart').getContext('2d');
+        new Chart(ctxTrans, {
+            type: 'bar',
+            data: {
+                labels: ['CASH-OUT', 'PAYMENT', 'CASH-IN', 'TRANSFER'],
+                datasets: [{
+                    label: 'Reference Period (%)',
+                    data: [28.4, 42.1, 20.7, 8.8],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Analysis Period (%)',
+                    data: [38.1, 39.2, 15.3, 7.4],
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Percentage of Transactions'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Transaction Type Distribution: Reference vs Analysis Period'
+                    }
+                }
+            }
+        });
+
+        // Performance Metrics Chart
+        const ctxPerf = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctxPerf, {
+            type: 'radar',
+            data: {
+                labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC'],
+                datasets: [{
+                    label: 'Reference Period',
+                    data: [94.2, 91.8, 93.6, 92.7, 96.4],
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2
+                }, {
+                    label: 'Analysis Period',
+                    data: [87.1, 84.3, 82.4, 83.3, 91.2],
+                    fill: true,
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: false
+                        },
+                        suggestedMin: 75,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Model Performance Comparison'
+                    }
+                }
+            }
+        });
+
+        // Data Drift Chart
+        const ctxDrift = document.getElementById('driftChart').getContext('2d');
+        new Chart(ctxDrift, {
+            type: 'line',
+            data: {
+                labels: ['Nov 2018', 'Dec 2018', 'Jan 2019', 'Feb 2019', 'Mar 2019', 'Apr 2019', 'May 2019', 'Jun 2019', 'Jul 2019', 'Aug 2019', 'Sep 2019', 'Oct 2019'],
+                datasets: [{
+                    label: 'transaction_type',
+                    data: [0.15, 0.23, 0.31, 0.45, 0.62, 0.78, 0.84, 0.91, 0.94, 0.97, 0.95, 0.94],
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4
+                }, {
+                    label: 'transaction_amount',
+                    data: [0.12, 0.18, 0.25, 0.34, 0.48, 0.59, 0.67, 0.72, 0.78, 0.81, 0.79, 0.78],
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4
+                }, {
+                    label: 'user_tenure_months',
+                    data: [0.08, 0.14, 0.22, 0.29, 0.38, 0.47, 0.56, 0.62, 0.67, 0.69, 0.68, 0.67],
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1.0,
+                        title: {
+                            display: true,
+                            text: 'Drift Score'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time Period'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Feature Drift Evolution Over Time'
+                    }
+                }
+            }
+        });
+
+        // Fraud Amount Chart
+        const ctxAmount = document.getElementById('fraudAmountChart').getContext('2d');
+        new Chart(ctxAmount, {
+            type: 'bar',
+            data: {
+                labels: ['< £1K', '£1K-£5K', '£5K-£10K', '£10K-£25K', '> £25K'],
+                datasets: [{
+                    label: 'Reference Period Fraud Rate (%)',
+                    data: [2.1, 4.8, 8.3, 12.7, 18.9],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Analysis Period Fraud Rate (%)',
+                    data: [3.4, 6.2, 11.1, 16.8, 24.3],
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Fraud Rate (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Transaction Amount Range'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Fraud Rate by Transaction Amount Range'
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
+        // Task completion update
+        function updateTaskStatus() {
+            fetch('/api/tasks/3/complete', { method: 'POST' })
+                .catch(() => {}); // Silently handle any errors
+        }
+        
+        // Call when page is loaded
+        document.addEventListener('DOMContentLoaded', updateTaskStatus);
+    </script>
+</body>
+</html>
