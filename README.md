@@ -397,7 +397,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**Elite Post-Deployment Data Scientist**
+**Phinidy George,Elite Post-Deployment Data Scientist**
 - Role: ML Model Monitoring & Performance Analysis
 - Client: Poundbank (Major UK Financial Institution)
 - Focus: Fraud Detection System Optimization
