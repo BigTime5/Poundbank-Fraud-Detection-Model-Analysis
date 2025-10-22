@@ -288,8 +288,8 @@ pip package manager
 ### Setup
 ```bash
 # Clone repository
-git clone https://github.com/your-username/fraud-detection-drift-analysis.git
-cd fraud-detection-drift-analysis
+git clone https://github.com/BigTime5/Poundbank-Fraud-Detection-Model-Analysis.git
+cd Poundbank-Fraud-Detection-Model-Analysis
 
 # Install dependencies
 pip install -r requirements.txt
