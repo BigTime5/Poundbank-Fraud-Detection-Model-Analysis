@@ -4,12 +4,15 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![NannyML](https://img.shields.io/badge/NannyML-Drift%20Detection-green.svg)](https://nannyml.readthedocs.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![View Report](https://img.shields.io/badge/View-Interactive%20Report-orange.svg)](https://bigtime5.github.io/Poundbank-Fraud-Detection-Model-Analysis/)
 
 ---
 
 ## 📋 Executive Summary
 
 This project delivers a **comprehensive post-deployment analysis** of Poundbank's fraud detection machine learning model, revealing critical insights into model degradation and data drift patterns across an 18-month production window (January 2018 - June 2019).
+
+> **🔗 [View Interactive HTML Report](https://bigtime5.github.io/Poundbank-Fraud-Detection-Model-Analysis/)**
 
 ### Key Findings
 - **Performance Degradation**: 1.16% decline in F1-Score with 26.6% increase in False Positive Rate
@@ -261,7 +264,8 @@ fraud-detection-drift-analysis/
 │   └── fraud_model_analysis.ipynb             # Complete analysis pipeline
 │
 ├── reports/
-│   └── comprehensive_fraud_analysis_report.json  # Executive summary
+│   ├── comprehensive_fraud_analysis_report.json  # Executive summary
+│   └── index.html                             # Interactive HTML report
 │
 ├── visualizations/
 │   ├── model_performance_analysis.png
@@ -296,6 +300,9 @@ pip install -r requirements.txt
 
 # Launch Jupyter notebook
 jupyter notebook notebooks/fraud_model_analysis.ipynb
+
+# View interactive report
+# Open https://bigtime5.github.io/Poundbank-Fraud-Detection-Model-Analysis/ in your browser
 ```
 
 ### Requirements
@@ -373,6 +380,9 @@ for prob_range in [(0, 0.1), (0.1, 0.2), ..., (0.9, 1.0)]:
 - Google ML Monitoring Best Practices: https://cloud.google.com/architecture/mlops-continuous-delivery
 - AWS Fraud Detection Guide: https://aws.amazon.com/fraud-detector/
 
+### Project Resources
+- **Interactive Report**: https://bigtime5.github.io/Poundbank-Fraud-Detection-Model-Analysis/
+- **GitHub Repository**: https://github.com/BigTime5/Poundbank-Fraud-Detection-Model-Analysis
 
 ---
 
@@ -397,7 +407,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**Phinidy George,Elite Post-Deployment Data Scientist**
+**Phinidy George, Elite Post-Deployment Data Scientist**
 - Role: ML Model Monitoring & Performance Analysis
 - Client: Poundbank (Major UK Financial Institution)
 - Focus: Fraud Detection System Optimization
@@ -416,7 +426,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions, feedback, or collaboration opportunities:
 - 📧 Email: [phinidygeorge01@gmail.com]
-
+- 🔗 Interactive Report: https://bigtime5.github.io/Poundbank-Fraud-Detection-Model-Analysis/
 
 ---
 
@@ -436,6 +446,7 @@ For questions, feedback, or collaboration opportunities:
 🎯 3-tier actionable recommendation framework
 💰 £3M annual risk exposure quantified
 ⚡ 0.5% immediate F1-Score improvement identified
+🌐 Interactive HTML report with visualizations
 ```
 
 ---
